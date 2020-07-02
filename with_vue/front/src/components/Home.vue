@@ -3,6 +3,11 @@
     <h1>This is a home page</h1>
     <p>Random number from backend: {{ randomNumber }}</p>
     <button @click='updateRandom'>New random number</button>
+    <el-table class='data-table' :data='tableData' stripe>
+      <el-table-column prop='id' label='ID' width='180'></el-table-column>
+      <el-table-column prop='name' label='名前' width='180'></el-table-column>
+      <el-table-column prop='note' label='備考'></el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -12,17 +17,30 @@ export default {
   name: 'home',
   data () {
     return {
-      randomNumber: 0
+      randomNumber: 0,
+      tableData: []
     }
   },
   mounted () {
     this.updateRandom()
+    this.updateTableData()
   },
   methods: {
     updateRandom: async function () {
       const response = await axios.get('/api/random')
       this.randomNumber = response.data.randomNumber
+    },
+    updateTableData: async function () {
+      const response = await axios.get('/api/spam')
+      this.tableData = response.data
     }
   }
 }
 </script>
+
+<style scoped>
+.data-table {
+  width: 80%;
+  margin: auto;
+}
+</style>
