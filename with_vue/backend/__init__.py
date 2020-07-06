@@ -1,6 +1,5 @@
 from flask import Flask
 
-
 def create_app(app_name='FLASK-VUE'):
     app = Flask(app_name,
                 static_folder="./dist/static",

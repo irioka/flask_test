@@ -8,6 +8,7 @@ npm install -g @vue/cli-init
 
 vue init webpack front
 
-npm install axios
+npm install axios json-server
 npm install -D webpack webpack-cli
 npm install -D eslint prettier
+

@@ -4,23 +4,41 @@
   // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    {"name":"Python: Current File","type":"python","request":"launch","program":"${file}","console":"integratedTerminal"},
+    {
+      "name":"Python: Current File",
+      "type":"python",
+      "request":"launch",
+      "program":"${file}",
+      "console":"integratedTerminal"
+    },
     {
       "name": "Python: Flask",
       "type": "python",
       "request": "launch",
+      "stopOnEntry": false,
       "module": "flask",
+      "cwd": "${workspaceFolder}",
       "env": {
-        "FLASK_APP": "app.py",
+        "FLASK_APP": "${workspaceFolder}/app.py",
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "0"
       },
       "args": [
         "run",
-        "--no-debugger",
-        "--no-reload"
+        "--debugger",
+        "--reload"
       ],
-      "jinja": true
-    }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Vue.js: chrome",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/front/src",
+      "breakOnLoad": true,
+      "sourceMapPathOverrides": {
+        "webpack:///front/src/*": "${webRoot}/*"
+      }
+    },
   ]
 }
