@@ -1,11 +1,10 @@
 <template>
   <div class="home">
     <h1>This is a home page</h1>
-    <p>Random number from backend: {{ randomNumber }}</p>
-    <button @click="updateRandom">New random number</button>
-
-    <div class="col-sm-8 col-md-6 col-lg-6">
-      <p>タスクの登録</p>
+    <b-form action="/-/logout" method="post">
+      <b-button type="submit">ログアウト</b-button>
+    </b-form>
+    <div class="col-sm-8 col-md-6 col-lg-6" align="center">
       <b-form v-if="show">
         <b-form-group label="Title:" label-for="title">
           <b-form-input v-model="title"
@@ -39,6 +38,7 @@
       <el-table-column prop="text" label="Text"></el-table-column>
     </el-table> -->
 
+    <br />
     <b-list-group v-for="(task, index) in tasks" :key="index">
       <b-list-group-item>
         {{ task.title }}<br />
@@ -63,7 +63,6 @@ export default {
   name: 'home',
   data () {
     return {
-      randomNumber: 0,
       tasks: [],
       title: '',
       text: '',
@@ -71,14 +70,9 @@ export default {
     }
   },
   mounted () {
-    this.updateRandom()
     this.getTasks()
   },
   methods: {
-    updateRandom: async function () {
-      const response = await axios.get('/api/random')
-      this.randomNumber = response.data.randomNumber
-    },
     getTasks: async function () {
       const response = await axios.get('/api/task')
       this.tasks = response.data
@@ -117,6 +111,11 @@ export default {
 <style scoped>
 .data-table {
   width: 80%;
+  margin: auto;
+}
+
+.list-group {
+  width: 30%;
   margin: auto;
 }
 </style>
