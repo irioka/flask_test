@@ -44,4 +44,3 @@
 
 - [FlaskとVue.jsでSPA Webアプリ開発](https://qiita.com/y-tsutsu/items/67f71fc8430a199a3efd)
 - [Vue.jsとFlaskでフルスタックなWebアプリの開発環境を構築 その１〜〜環境構築〜〜](https://kittagon.hateblo.jp/entry/2018/08/27/011354)
-

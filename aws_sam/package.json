@@ -1,0 +1,22 @@
+{
+  "name": "aws_sam",
+  "version": "1.0.0",
+  "description": "1. flask用のフレームワーク/ライブラリをインストール",
+  "main": "index.js",
+  "dependencies": {
+    "serverless": "^1.74.1"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^5.1.0",
+    "serverless-wsgi": "^1.7.5"
+  },
+  "scripts": {
+    "deploy": "sls deploy",
+    "remove": "sls remove",
+    "serve": "sls wsgi serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

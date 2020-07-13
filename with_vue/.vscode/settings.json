@@ -1,5 +1,5 @@
 {
-  "python.pythonPath": "${env:HOME}\\Anaconda3\\python.exe",
+  "python.pythonPath": "${env:HOME}\\Anaconda3\\envs\\AWS\\python.exe",
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true

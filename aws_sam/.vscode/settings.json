@@ -1,0 +1,9 @@
+{
+  "python.pythonPath": "${env:HOME}\\Anaconda3\\envs\\AWS\\python.exe",
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  }
+}
