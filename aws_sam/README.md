@@ -1,67 +1,80 @@
-# AWS SAM flaskサンプル
+# AWS SAM flask サンプル
 
 ## 開発環境構築手順
 
-1. Serverless Frameworkインストール & 初期化
+1. WSL を使用する
 
-    ```cmd
-    npm install serverless
-    npm init -f
-    ```
+   - Ubuntu 20.04.LTS
+     - Daito 等の環境と分けるため
+   - anaconda
+     - Python は 3.7 に(Lambda は 3.8 でも OK). `conda install python==3.7.6`
+   - awscli
+   - npm
+   - conda install boto3
 
-    node_modules/.binに`serverless`,`sls`などのコマンドがインストールされる.
+2. Serverless Framework インストール & 初期化
 
-2. 開発用npmプラグインをインストール
+   ```cmd
+   npm install serverless
+   npm init -f
+   ```
 
-    ```cmd
-    npm install -D serverless-wsgi serverless-python-requirements
-    ```
+   node_modules/.bin に`serverless`,`sls`などのコマンドがインストールされる.
 
-3. `package.json`の`scripts`にコマンドを追加.
+3. 開発用 npm プラグインをインストール
 
-    ```cmd
-    "deploy": "sls deploy"
-    "remove": "sls remove"
-    "serve": "sls wsgi serve"
-    ```
+   ```cmd
+   npm install -D serverless-wsgi serverless-python-requirements
+   npm install -D serverless-dynamodb-local
+   ```
 
-4. ローカルへのDeploy
+4. `package.json`の`scripts`にコマンドを追加.
 
-    ```cmd
-    npm run serve
-    ```
+   ```cmd
+   "deploy": "sls deploy"
+   "remove": "sls remove"
+   "serve": "sls wsgi serve"
+   ```
 
-    ```info
-    Service Information
-    service: serverless-flask
-    stage: dev
-    region: ap-northeast-1
-    stack: serverless-flask-dev
-    resources: 12
-    api keys:
-    None
-    functions:
-    app: serverless-flask-dev-app
-    layers:
-    None
-    ```
+5. ローカルへの Deploy
 
-    Lambda, Role, Cloudformation stack, s3 bucket, API Gateway, CloudWatchが作成される.
+   ```cmd
+   npm run serve
+   ```
 
-5. AWSへのDeploy
+   ```info
+   Service Information
+   service: serverless-flask
+   stage: dev
+   region: ap-northeast-1
+   stack: serverless-flask-dev
+   resources: 12
+   api keys:
+   None
+   functions:
+   app: serverless-flask-dev-app
+   layers:
+   None
+   ```
 
-    ```cmd
-    npm run deploy
-    ```
+   Lambda, Role, Cloudformation stack, s3 bucket, API Gateway, CloudWatch が作成される.
+
+6. AWS への Deploy
+
+   ```cmd
+   npm run deploy
+   ```
+
+   wsl のホームディレクトリの.aws に config と credentials の設定が必要
 
 ## Tips
 
-- ローカルのDockerは不要.
-- Lambdaへはrequirements.txtでの必要なライブラリを含めたZipがDeployされる.
-  
+- ローカルの Docker は不要.
+- Lambda へは requirements.txt での必要なライブラリを含めた Zip が Deploy される.
+
   _プロジェクトフォルダ下も全て内包されるので注意_
 
-### AWS上のDeploy内容の削除
+### AWS 上の Deploy 内容の削除
 
 ```cmd
 npm run remove
