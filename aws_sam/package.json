@@ -12,12 +12,13 @@
     "serverless-wsgi": "^1.7.5"
   },
   "scripts": {
-    "deploy": "sls deploy",
-    "remove": "sls remove",
-    "serve": "sls wsgi serve",
+    "serve": "serverless wsgi serve",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db_install": "sls dynamodb install",
-    "db_start": "sls dynamodb start"
+    "db_install": "serverless dynamodb install",
+    "db_start": "serverless dynamodb start",
+    "package": "serverless package",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,17 @@
+build-ami:
+  build: ./
+  volumes:
+    - .:/tmp
+  stdin_open: true
+  tty: true
+  working_dir: /tmp
+  entrypoint: /bin/bash
+  env_file:
+    #  aws configureで設定したAWS 認証情報ファイル.環境変数名はLinuxでは大文字,Windowsでは小文字でないと認証できないことがあるので注意.下記environmentセクションに記述することも可能です.
+    - ~/.aws/credentials
+  # environment:
+  #   - GOPATH=/root/go:/tmp/server/classer:/tmp/server/summarizer:/tmp/server/analyzer:/tmp/server/calculator
+
+    # - AWS_ACCESS_KEY_ID=xxxxx
+    # - AWS_SECRET_ACCESS_KEY=xxxxx
+    # - AWS_DEFAULT_REGION=ap-northeast-1
