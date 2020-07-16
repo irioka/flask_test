@@ -15,10 +15,7 @@
     "serve": "serverless wsgi serve",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db_install": "serverless dynamodb install",
-    "db_start": "serverless dynamodb start",
-    "package": "serverless package",
-    "deploy": "serverless deploy",
-    "remove": "serverless remove"
+    "db_start": "serverless dynamodb start"
   },
   "keywords": [],
   "author": "",

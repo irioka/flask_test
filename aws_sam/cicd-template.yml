@@ -1,0 +1,247 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Severless test CloudFormation CI/CD Pipeline
+
+Parameters:
+  PipelineName:
+    Type: String
+  S3Bucket:
+    Type: String
+  StackName:
+    Type: String
+  RepositoryName:
+    Type: String
+  BranchName:
+    Default: master
+    Type: String
+  TemplateFileName:
+    Default: packaged-template.yml
+    Type: String
+  TestStackConfig:
+    Default: test-stack-configuration.json
+    Type: String
+  ChangeSetName:
+    Default: UpdatePreview-ServerlessTest
+    Type: String
+  Email:
+    Type: String
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "CodePipeline Settings"
+        Parameters:
+          - PipelineName
+          - S3Bucket
+          - RepositoryName
+          - BranchName
+          - Email
+      - Label:
+          default: "Test Stack Settings"
+        Parameters:
+          - StackName
+          - ChangeSetName
+          - TestStackConfig
+          - TemplateFileName
+
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  CodeBuildBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${StackName}-build
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        # Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Image: aws/codebuild/standard:3.0
+        EnvironmentVariables:
+          - Name: S3_BUCKET
+            Value: !Ref S3Bucket
+          - Name: S3_CODEBUILD_BUCKET
+            Value: !Ref CodeBuildBucket
+      Source:
+        BuildSpec: buildspec.yml
+        Type: CODEPIPELINE
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref PipelineName
+      RoleArn: !GetAtt PipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactStoreBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: DownloadSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: 1
+              Configuration:
+                RepositoryName: !Ref RepositoryName
+                BranchName: !Ref BranchName
+              OutputArtifacts:
+                - Name: SourceOutput
+
+        - Name: Build
+          Actions:
+            - InputArtifacts:
+                - Name: SourceOutput
+              Name: Build_and_Packaging
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: TemplateSource
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+
+        - Name: TestStage
+          Actions:
+            - Name: CreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              InputArtifacts:
+                - Name: TemplateSource
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                ChangeSetName: !Sub ${ChangeSetName}
+                Capabilities: CAPABILITY_IAM
+                RoleArn: !GetAtt [CFNRole, Arn]
+                StackName: !Sub ${StackName}-test
+                TemplateConfiguration: !Sub TemplateSource::${TestStackConfig}
+                TemplatePath: !Sub TemplateSource::${TemplateFileName}
+                ParameterOverrides: !Sub |
+                  {
+                    "S3BucketName": "${S3Bucket}"
+                  }
+              RunOrder: 1
+
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Sub ${ChangeSetName}-test
+                RoleArn: !GetAtt [CFNRole, Arn]
+                StackName: !Sub ${StackName}-test
+              RunOrder: 2
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CloudWatchLogsAccess
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              - Sid: S3Access
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: "*"
+              - Sid: CloudFormationAccess
+                Effect: Allow
+                Action: cloudformation:ValidateTemplate
+                Resource: "*"
+
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: cloudformation.amazonaws.com
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CFNAccess
+                Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - iam:PassRole
+                Resource: "*"
+              - Sid: S3Access
+                Effect: Allow
+                Action: s3:*
+                Resource: "*"
+              - Sid: CodeComiitAccess
+                Effect: Allow
+                Action: codecommit:*
+                Resource: "*"
+              - Sid: CodeBuildAccess
+                Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource:
+                  - !GetAtt CodeBuildProject.Arn

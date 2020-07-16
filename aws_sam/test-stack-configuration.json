@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Stage": "test",
+    "LOCATION": "Asia/Tokyo",
+    "LogLevel": "DEBUG"
+  }
+}

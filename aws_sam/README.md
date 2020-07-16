@@ -1,72 +1,76 @@
 # AWS SAM flask サンプル
 
+CodePipelineを使うには、`serverless_test`プロジェクトからCodeCommitの`dge-serverless-test`へPushする.
+
+
 ## 開発環境構築
 
-1. npmパッケージインストール
+1. npm パッケージインストール
 
    ```powershell
    npm install
    ```
 
    - スクラッチからの作成方法.
-      - Serverless Framework インストール & 初期化
 
-         ```powershell
-         npm install serverless
-         npm init -f
-         ```
+     - Serverless Framework インストール & 初期化
 
-         node_modules/.bin に`serverless`などのコマンドがインストールされる.
+       ```powershell
+       npm install serverless
+       npm init -f
+       ```
 
-      - 開発用 npm プラグインをインストール
+       node_modules/.bin に`serverless`などのコマンドがインストールされる.
 
-         ```powershell
-         npm install -D serverless-wsgi serverless-python-requirements serverless-offline-python
-         npm install -D serverless-dynamodb-local
-         ```
+     - 開発用 npm プラグインをインストール
 
-      - `package.json`の`scripts`にコマンドを追加.
+       ```powershell
+       npm install -D serverless-wsgi serverless-python-requirements serverless-offline-python
+       npm install -D serverless-dynamodb-local
+       ```
 
-         ```json
-         "serve": "serverless wsgi serve"
-         "db_install": "serverless dynamodb install",
-         "db_start": "serverless dynamodb start"
-         "deploy": "serverless deploy"
-         "package": "serverless package"
-         "remove": "serverless remove"
-         ```
+     - `package.json`の`scripts`にコマンドを追加.
+
+       ```json
+       "serve": "serverless wsgi serve"
+       "db_install": "serverless dynamodb install",
+       "db_start": "serverless dynamodb start"
+       "deploy": "serverless deploy"
+       "package": "serverless package"
+       "remove": "serverless remove"
+       ```
 
 2. ローカルでの実行
 
-   - DynamoDB初期化&実行
+   - DynamoDB 初期化&実行
 
-      ```powershell
-      npm run db_install
-      npm run db_start
-      ```
+     ```powershell
+     npm run db_install
+     npm run db_start
+     ```
 
-      - 実行にはJavaが必要.
+     - 実行には Java が必要.
 
-   - Serverless実行&Debug
+   - Serverless 実行&Debug
 
-      ```powershell
-      npm run serve
-      ```
+     ```powershell
+     npm run serve
+     ```
 
-      - DynamoDBとServerlessは別々のコンソールで実行.
-      - Debugの構成で`Python: Attach using Process Id`を作成し、上記のプロセスにAttachするとBreakpointが使えるようになる.
+     - DynamoDB と Serverless は別々のコンソールで実行.
+     - Debug の構成で`Python: Attach using Process Id`を作成し、上記のプロセスに Attach すると Breakpoint が使えるようになる.
 
-   - POST/GETのテスト
+   - POST/GET のテスト
 
-      ```powershell
-      curl -H "Content-Type: application/json" -X POST http://localhost:5000/users -d '{"userId": "alexdebrie1", "name": "Alex DeBrie"}'
-      ```
+     ```powershell
+     curl -H "Content-Type: application/json" -X POST http://localhost:5000/users -d '{"userId": "alexdebrie1", "name": "Alex DeBrie"}'
+     ```
 
-      ```powershell
-      curl -H "Content-Type: application/json" -X GET http://localhost:5000/users/alexdebrie1
-      ```
+     ```powershell
+     curl -H "Content-Type: application/json" -X GET http://localhost:5000/users/alexdebrie1
+     ```
 
-3. PackagingとAWS への Deploy
+3. Packaging と AWS への Deploy
 
    ```powershell
    npm run package
@@ -80,9 +84,9 @@
 
    - AWS 上の Deploy 内容の削除
 
-      ```cmd
-      npm run remove
-      ```
+     ```cmd
+     npm run remove
+     ```
 
 ## Tips
 
@@ -91,7 +95,7 @@
 - Ubuntu 20.04LTS
 
 ```bash
-sudo apt install make unzip
+sudo apt -y install make unzip
 ```
 
 ```bash
@@ -106,29 +110,34 @@ cd /tmp
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 command -v nvm
 nvm install --lts
+
+or
+
+curl -sL https://deb.nodesource.com/setup_current.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
-homeディレクトリの.aws/configure,credentialsを設定.Permissionに注意.
+home ディレクトリの.aws/configure,credentials を設定.Permission に注意.
 
-### Dockerコンテナ利用方法
+### Docker コンテナ利用方法
 
-_ATTENTION: npmパッケージがWindowsと食い違うなどでErrorとなる._
+_ATTENTION: npm パッケージが Windows と食い違うなどで Error となる._
 
 - Windows で docker-machine 作成(マシン名や各サイズは任意)
 
-   ```powershell
-   docker-machine create --virtualbox-cpu-count 2 --virtualbox-disk-size 20000 --virtualbox-memory 4096 default
-   ```
+  ```powershell
+  docker-machine create --virtualbox-cpu-count 2 --virtualbox-disk-size 20000 --virtualbox-memory 4096 default
+  ```
 
-   _ATTENTION: Docker Toolbox(VirtualBox) の場合はソースコードのあるドライブを共有フォルダへマウントする._
+  _ATTENTION: Docker Toolbox(VirtualBox) の場合はソースコードのあるドライブを共有フォルダへマウントする._
 
-- VSCodeでdockerコンテナを操作するために以下の環境変数をセットする
+- VSCode で docker コンテナを操作するために以下の環境変数をセットする
   - COMPOSE_CONVERT_WINDOWS_PATHS=true
   - DOCKER_CERT_PATH=%USERPROFILE%\.docker\machine\machines\default
   - DOCKER_HOST=tcp://{docker-machine の IP}:2376
   - DOCKER_TLS_VERIFY=1
 
-### Dockerマシンとコンテナの起動
+### Docker マシンとコンテナの起動
 
 ```powershell
 docker-machine start default
@@ -140,6 +149,6 @@ docker-machine env --shell powershell default
 docker-compose -f docker-compose.yml up -d --build
 ```
 
-- DockerマシンへのAttach Shell
+- Docker マシンへの Attach Shell
 
-   VSCodeのDockerパネルで起動したコンテナを右クリックして、`Attach Shell`するとターミナルが開く.
+  VSCode の Docker パネルで起動したコンテナを右クリックして、`Attach Shell`するとターミナルが開く.
