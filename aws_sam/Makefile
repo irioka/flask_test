@@ -15,7 +15,7 @@ create-bucket:
 	aws s3api create-bucket --bucket $(S3_BUCKET) --create-bucket-configuration LocationConstraint=$(REGION)
 
 package:
-	$(SERVERLESS) package
+	$(SERVERLESS) package --s3_bucket $(S3_BUCKET)
 
 dev-deploy:
 	$(SERVERLESS) deploy --s3_bucket $(S3_BUCKET)

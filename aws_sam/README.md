@@ -1,5 +1,23 @@
 # AWS SAM flask サンプル
 
+Severless frameworkは簡単にdeployできるが、YAMLの内容が異なっていてCodePipelineが動かない!
+
+AWS SAM CLI [64-bit]() をインストール
+
+サンプル作成
+```powershell
+sam init
+```
+
+DynamoDB Localの導入
+
+```powershell
+docker pull amazon/dynamodb-local
+docker run -d -p 8000:8000 amazon/dynamodb-local -jar DynamoDBLocal.jar -inMemory -sharedDb
+docker ps --no-trunc
+```
+
+
 CodePipelineを使うには、`serverless_test`プロジェクトからCodeCommitの`dge-serverless-test`へPushする.
 
 
@@ -90,9 +108,11 @@ CodePipelineを使うには、`serverless_test`プロジェクトからCodeCommi
 
 ## Tips
 
+- ローカルのCodeBuild環境構築は`docker build`でエラーになる.AWSで直接行った方が良い.
+
 ### WSL
 
-- Ubuntu 20.04LTS
+- Ubuntu 20.04 LTS
 
 ```bash
 sudo apt -y install make unzip
@@ -119,7 +139,7 @@ sudo apt-get install -y nodejs
 
 home ディレクトリの.aws/configure,credentials を設定.Permission に注意.
 
-### Docker コンテナ利用方法
+### Dockerマシンの構築
 
 _ATTENTION: npm パッケージが Windows と食い違うなどで Error となる._
 
@@ -137,18 +157,43 @@ _ATTENTION: npm パッケージが Windows と食い違うなどで Error とな
   - DOCKER_HOST=tcp://{docker-machine の IP}:2376
   - DOCKER_TLS_VERIFY=1
 
-### Docker マシンとコンテナの起動
+- Dockerマシン起動
+
+  ```powershell
+  docker-machine start default
+
+  docker-machine env --shell powershell default
+
+  & "C:\Program Files\Docker Toolbox\docker-machine.exe" env --shell powershell default | Invoke-Expression
+  ```
+
+- Dockerマシンへのssh
+
+  ```powershell
+  docker-machine ssh default
+  ```
+
+### Dockerコンテナの起動
 
 ```powershell
-docker-machine start default
-
-docker-machine env --shell powershell default
-
-& "C:\Program Files\Docker Toolbox\docker-machine.exe" env --shell powershell default | Invoke-Expression
-
 docker-compose -f docker-compose.yml up -d --build
 ```
 
-- Docker マシンへの Attach Shell
+- DockerコンテナAttach Shell
+
+  VSCode の Docker パネルで起動したコンテナを右クリックして、`Attach Shell`するとターミナルが開く.
+
+### ローカルでのAWS CodeBuild
+
+- Dockerマシンへsshして作業
+- ビルドを行うコンテナのイメージ構築
+
+  ```powershell
+  git clone https://github.com/aws/aws-codebuild-docker-images.git
+  ```
+
+  - 
+
+- DockerコンテナAttach Shell
 
   VSCode の Docker パネルで起動したコンテナを右クリックして、`Attach Shell`するとターミナルが開く.
